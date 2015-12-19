@@ -71,7 +71,8 @@ public class MainActivity extends ActionBarActivity {
                         OpenClick(null);
                     } else {
                         String file=sel.getPath();
-                        hrtf.Stop3D();
+                        if (hrtf!=null)
+                            hrtf.Stop3D();
                         if (!BASS.BASS_StreamFree(chan))
                             BASS.BASS_MusicFree(chan);
                         if ((chan=BASS.BASS_StreamCreateFile(file, 0, 0, BASS.BASS_SAMPLE_LOOP))==0
