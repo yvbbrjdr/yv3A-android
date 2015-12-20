@@ -1,6 +1,8 @@
 package tk.yvbb.yv3daudio;
 
 import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.un4seen.bass.BASS;
 
@@ -10,6 +12,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -27,7 +31,27 @@ public class MainActivity extends ActionBarActivity {
     Button openbut,stopbut,applybut;
     ToggleButton playtb,cycletb;
     EditText xtext,ytext,ztext;
-
+    
+    Handler TurningHandler=new Handler() {
+    	public void handleMessage(Message msg) {
+    		switch (msg.what) {
+    			case 1:
+    				double x=Double.parseDouble(xtext.getText().toString()),z=Double.parseDouble(ztext.getText().toString());
+    				double theta=Math.atan2(z,x),d=Math.sqrt(x*x+z*z);
+    			    theta+=.05;
+    			    xtext.setText(Double.toString(d*Math.cos(theta)));
+    			    ztext.setText(Double.toString(d*Math.sin(theta)));
+    			    ApplyClick(null);
+    				break;
+    		}
+    		super.handleMessage(msg);
+    	}
+    };
+    
+    TimerTask TurningTask;
+    
+    Timer TurningTimer;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,7 +148,17 @@ public class MainActivity extends ActionBarActivity {
     }
     
     public void CycleClick(View v) {
-        cycletb.setChecked(false);
+        if (cycletb.isChecked()) {
+        	TurningTask=new TimerTask() {
+            	public void run() {
+            		TurningHandler.sendEmptyMessage(1);
+            	}
+            };
+        	TurningTimer=new Timer(true);
+            TurningTimer.schedule(TurningTask,100,100);
+        } else {
+            TurningTimer.cancel();
+        }
     }
 
     @Override
