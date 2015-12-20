@@ -33,25 +33,27 @@ public class MainActivity extends ActionBarActivity {
     EditText xtext,ytext,ztext;
     
     Handler TurningHandler=new Handler() {
-    	public void handleMessage(Message msg) {
-    		switch (msg.what) {
-    			case 1:
-    				double x=Double.parseDouble(xtext.getText().toString()),z=Double.parseDouble(ztext.getText().toString());
-    				double theta=Math.atan2(z,x),d=Math.sqrt(x*x+z*z);
-    			    theta+=.05;
-    			    xtext.setText(Double.toString(d*Math.cos(theta)));
-    			    ztext.setText(Double.toString(d*Math.sin(theta)));
-    			    ApplyClick(null);
-    				break;
-    		}
-    		super.handleMessage(msg);
-    	}
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 1:
+                    double x=Double.parseDouble(xtext.getText().toString()),z=Double.parseDouble(ztext.getText().toString());
+                    double theta=Math.atan2(z,x),d=Math.sqrt(x*x+z*z);
+                    theta+=.05;
+                    xtext.setText(Double.toString(d*Math.cos(theta)));
+                    ztext.setText(Double.toString(d*Math.sin(theta)));
+                    ApplyClick(null);
+                    break;
+            }
+            super.handleMessage(msg);
+        }
     };
     
     TimerTask TurningTask;
     
     Timer TurningTimer;
     
+    boolean isCycling=false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,8 +98,8 @@ public class MainActivity extends ActionBarActivity {
                         OpenClick(null);
                     } else {
                         String file=sel.getPath();
-                        if (hrtf!=null)
-                            hrtf.Stop3D();
+                        if (isCycling)
+                            StopCycle();
                         if (!BASS.BASS_StreamFree(chan))
                             BASS.BASS_MusicFree(chan);
                         if ((chan=BASS.BASS_StreamCreateFile(file, 0, 0, BASS.BASS_SAMPLE_LOOP))==0
@@ -149,16 +151,34 @@ public class MainActivity extends ActionBarActivity {
     
     public void CycleClick(View v) {
         if (cycletb.isChecked()) {
-        	TurningTask=new TimerTask() {
-            	public void run() {
-            		TurningHandler.sendEmptyMessage(1);
-            	}
-            };
-        	TurningTimer=new Timer(true);
-            TurningTimer.schedule(TurningTask,100,100);
+            StartCycle();
         } else {
-            TurningTimer.cancel();
+            StopCycle();
         }
+    }
+
+    public void StartCycle() {
+        TurningTask=new TimerTask() {
+            public void run() {
+                TurningHandler.sendEmptyMessage(1);
+            }
+        };
+        TurningTimer=new Timer(true);
+        TurningTimer.schedule(TurningTask,100,100);
+        xtext.setEnabled(false);
+        ytext.setEnabled(false);
+        ztext.setEnabled(false);
+        cycletb.setChecked(true);
+        isCycling=true;
+    }
+
+    public void StopCycle() {
+        TurningTimer.cancel();
+        xtext.setEnabled(true);
+        ytext.setEnabled(true);
+        ztext.setEnabled(true);
+        cycletb.setChecked(false);
+        isCycling=false;
     }
 
     @Override
