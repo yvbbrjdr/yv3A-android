@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
-import android.annotation.SuppressLint;
 import android.content.res.AssetManager;
 import com.un4seen.bass.*;
 
