@@ -30,7 +30,7 @@ public class yvHRTF {
                     is.read(t,0,512);
                     bb.rewind();
                     bb.put(t);
-                    bb.order(ByteOrder.LITTLE_ENDIAN);
+                    bb.order(ByteOrder.BIG_ENDIAN);
                     bb.rewind();
                     ShortBuffer sb=bb.asShortBuffer();
                     sb.get(HRTFData[i][j]);
@@ -93,14 +93,14 @@ public class yvHRTF {
                             data+=(int)(buf[cur-j])*HRTFData[e][a][j*2+oleft];
                         else
                             data+=(int)(Previous[cur-j+128])*HRTFData[e][a][j*2+oleft];
-                    ori[i]=(short)(data/5000000);
+                    ori[i]=(short)(data/500000);
                     data=0;
                     for (int j=0;j<128;++j)
                         if (cur-j>=0)
                             data+=(int)(buf[cur-j])*HRTFData[e][a][j*2+oright];
                         else
                             data+=(int)(Previous[cur-j+128])*HRTFData[e][a][j*2+oright];
-                    ori[i+1]=(short)(data/5000000);
+                    ori[i+1]=(short)(data/500000);
                     if (distance>1) {
                         ori[i]/=distance;
                         ori[i+1]/=distance;
