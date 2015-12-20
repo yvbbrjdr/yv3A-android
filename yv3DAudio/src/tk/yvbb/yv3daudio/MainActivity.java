@@ -39,6 +39,7 @@ public class MainActivity extends ActionBarActivity {
                     .commit();
         }
         BASS.BASS_Init(-1,44100,0);
+        yvHRTF.Init(getAssets());
         filepath=Environment.getExternalStorageDirectory();
         openbut=(Button)findViewById(R.id.button1);
         playtb=(ToggleButton)findViewById(R.id.toggleButton1);

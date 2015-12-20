@@ -1,10 +1,12 @@
 package tk.yvbb.yv3daudio;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-
+import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
+import android.annotation.SuppressLint;
+import android.content.res.AssetManager;
 import com.un4seen.bass.*;
 
 public class yvHRTF {
@@ -12,36 +14,38 @@ public class yvHRTF {
     private Vec SpePos=new Vec();
     private short Previous[]=new short[128];
     private static Vec LisPos=new Vec(),LisFace=new Vec(1,0,0),LisUp=new Vec(0,1,0);
-    private static boolean Initialized=false;
     private static short HRTFData[][][]=new short[14][181][256];
     private static boolean HRTFDataAvailable[][]=new boolean[14][181];
     
-    private static void Init() {
+    public static void Init(AssetManager am) {
         int n=0;
+        byte t[]=new byte[512];
+        ByteBuffer bb=ByteBuffer.allocate(512);
         for (int i=0;i<14;++i)
             for (int j=0;j<181;++j) {
-                String Filename;
-                Filename=String.format("hrtf-data/elev%d/H%de%03da.dat",(i-4)*10,(i-4)*10,j);
+                String Filename=String.format("hrtf-data/elev%d/H%de%03da.dat",(i-4)*10,(i-4)*10,j);
                 InputStream is;
-                FILE *fp=fopen(Filename,"rb");
-                if (fp==NULL)
+                try {
+                    is=am.open(Filename);
+                    is.read(t,0,512);
+                    bb.rewind();
+                    bb.put(t);
+                    bb.order(ByteOrder.LITTLE_ENDIAN);
+                    bb.rewind();
+                    ShortBuffer sb=bb.asShortBuffer();
+                    sb.get(HRTFData[i][j]);
+                    is.close();
+                    HRTFDataAvailable[i][j]=true;
+                    ++n;
+                } catch (IOException e) {
                     continue;
-                for (int k=0;k<256;k+=2) {
-                    fread(((char*)HRTFData[i][j])+k+1,1,1,fp);
-                    fread(((char*)HRTFData[i][j])+k,1,1,fp);
                 }
-                fclose(fp);
-                HRTFDataAvailable[i][j]=1;
-                ++n;
             }
         if (n==0)
             System.exit(0);
-        Initialized=true;
     }
     
     public yvHRTF(int handle) {
-        if (!Initialized)
-            Init();
         ChannelHandle=handle;
     }
     
@@ -68,40 +72,45 @@ public class yvHRTF {
                         break;
                     }
                 }
-                short *LeftData,*RightData;
+                int oleft=0,oright=0;
                 if (Sur.AngleDegree(d)>90) {
-                    LeftData=HRTFData[e][a]+1;
-                    RightData=HRTFData[e][a];
+                    oleft=1;
                 } else {
-                    LeftData=HRTFData[e][a];
-                    RightData=HRTFData[e][a]+1;
+                    oright=1;
                 }
                 double distance=LS.Len();
-                short *ori=(short*)buffer,*buf=(short*)malloc(length/2);
+                short ori[]=new short[length/2],buf[]=new short[length/4];
+                buffer.order(null);
+                ShortBuffer sbuffer=buffer.asShortBuffer();
+                sbuffer.get(ori);
                 for (int i=0;i<length/2;i+=2)
-                    buf[i/2]=ori[i]/2+ori[i+1]/2;
+                    buf[i/2]=(short)(ori[i]/2+ori[i+1]/2);
                 for (int i=0;i<length/2;i+=2) {
                     int cur=i/2;
                     int data=0;
                     for (int j=0;j<128;++j)
                         if (cur-j>=0)
-                            data+=int(buf[cur-j])*LeftData[j*2];
+                            data+=(int)(buf[cur-j])*HRTFData[e][a][j*2+oleft];
                         else
-                            data+=int(Previous[cur-j+128])*LeftData[j*2];
-                    ori[i]=data/500000;
+                            data+=(int)(Previous[cur-j+128])*HRTFData[e][a][j*2+oleft];
+                    ori[i]=(short)(data/5000000);
                     data=0;
                     for (int j=0;j<128;++j)
                         if (cur-j>=0)
-                            data+=int(buf[cur-j])*RightData[j*2];
+                            data+=(int)(buf[cur-j])*HRTFData[e][a][j*2+oright];
                         else
-                            data+=int(Previous[cur-j+128])*RightData[j*2];
-                    ori[i+1]=data/500000;
+                            data+=(int)(Previous[cur-j+128])*HRTFData[e][a][j*2+oright];
+                    ori[i+1]=(short)(data/5000000);
                     if (distance>1) {
                         ori[i]/=distance;
                         ori[i+1]/=distance;
                     }
                 }
-                memcpy(Previous,buf+length/4-128,256);
+                sbuffer.rewind();
+                sbuffer.put(ori);
+                for (int i=0;i<128;++i) {
+                    Previous[i]=buf[length/4-128+i];
+                }
             }
         };
         if (!Started()) {
