@@ -76,6 +76,15 @@
             android:textOff="@string/cycle"
             android:textOn="@string/cycle" />
 
+        <ToggleButton
+            android:id="@+id/toggleButton3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:onClick="EncodeClick"
+            android:textOff="@string/encode"
+            android:textOn="@string/encode" />
+
         <DigitalClock
             android:id="@+id/digitalClock1"
             android:layout_width="wrap_content"

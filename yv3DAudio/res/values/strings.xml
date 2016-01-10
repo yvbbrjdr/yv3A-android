@@ -9,6 +9,7 @@
     <string name="cycle">Cycle</string>
     <string name="zero">0</string>
     <string name="one">1</string>
+    <string name="encode">Encode</string>
     <string name="copyright">Coded by yvbbrjdr\nSource: github.com/yvbbrjdr/yv3A-android\nEmail: xyyq@outlook.com</string>
 
 </resources>

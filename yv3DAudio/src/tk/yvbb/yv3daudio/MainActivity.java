@@ -1,13 +1,17 @@
 package tk.yvbb.yv3daudio;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import com.un4seen.bass.BASS;
+import com.un4seen.bass.BASSenc;
 
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
+import android.text.format.Time;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -20,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class MainActivity extends ActionBarActivity {
@@ -29,7 +34,7 @@ public class MainActivity extends ActionBarActivity {
     String[] filelist;
     yvHRTF hrtf;
     Button openbut,stopbut,applybut;
-    ToggleButton playtb,cycletb;
+    ToggleButton playtb,cycletb,enctb;
     EditText xtext,ytext,ztext;
     
     Handler TurningHandler=new Handler() {
@@ -75,6 +80,7 @@ public class MainActivity extends ActionBarActivity {
         ztext=(EditText)findViewById(R.id.editText3);
         applybut=(Button)findViewById(R.id.button3);
         cycletb=(ToggleButton)findViewById(R.id.toggleButton2);
+        enctb=(ToggleButton)findViewById(R.id.toggleButton3);
     }
 
     public void OpenClick(View v) {
@@ -100,6 +106,8 @@ public class MainActivity extends ActionBarActivity {
                         String file=sel.getPath();
                         if (isCycling)
                             StopCycle();
+                        if (enctb.isChecked())
+                            StopEncode();
                         if (!BASS.BASS_StreamFree(chan))
                             BASS.BASS_MusicFree(chan);
                         if ((chan=BASS.BASS_StreamCreateFile(file, 0, 0, BASS.BASS_SAMPLE_LOOP))==0
@@ -110,7 +118,7 @@ public class MainActivity extends ActionBarActivity {
                             stopbut.setEnabled(false);
                             applybut.setEnabled(false);
                             cycletb.setEnabled(false);
-                            cycletb.setChecked(false);
+                            enctb.setEnabled(false);
                             return;
                         }
                         openbut.setText(file);
@@ -119,6 +127,7 @@ public class MainActivity extends ActionBarActivity {
                         stopbut.setEnabled(true);
                         applybut.setEnabled(true);
                         cycletb.setEnabled(true);
+                        enctb.setEnabled(true);
                         hrtf=new yvHRTF(chan);
                         ApplyClick(null);
                         hrtf.Start3D();
@@ -179,6 +188,30 @@ public class MainActivity extends ActionBarActivity {
         ztext.setEnabled(true);
         cycletb.setChecked(false);
         isCycling=false;
+    }
+
+    public void StartEncode() {
+        SimpleDateFormat df=new SimpleDateFormat("yyyyMMddHHmmss");
+        BASS.BASS_CHANNELINFO info=new BASS.BASS_CHANNELINFO();
+		BASS.BASS_ChannelGetInfo(chan,info);
+        String filename=info.filename+"."+df.format(new Date())+".wav";
+        BASSenc.BASS_Encode_Start(chan,filename,BASSenc.BASS_ENCODE_PCM,null,null);
+        Toast toast=Toast.makeText(getApplicationContext(),"The file will be writen to "+filename,Toast.LENGTH_LONG);
+        toast.show();
+        enctb.setChecked(true);
+    }
+
+    public void StopEncode() {
+        BASSenc.BASS_Encode_Stop(chan);
+        enctb.setChecked(false);
+    }
+
+    public void EncodeClick(View v) {
+        if (enctb.isChecked()) {
+            StartEncode();
+        } else {
+            StopEncode();
+        }
     }
 
     @Override
