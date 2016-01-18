@@ -12,17 +12,14 @@
         android:orientation="vertical" >
 
         <Button
-            android:id="@+id/button1"
+            android:id="@+id/OpenButton"
             android:layout_width="288dp"
             android:layout_height="wrap_content"
             android:onClick="OpenClick"
-            android:text="@string/open" >
-
-            <requestFocus />
-        </Button>
+            android:text="@string/open" />
 
         <ToggleButton
-            android:id="@+id/toggleButton1"
+            android:id="@+id/PlayTButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
@@ -31,36 +28,90 @@
             android:textOn="@string/play" />
 
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/StopButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
             android:onClick="StopClick"
             android:text="@string/stop" />
 
-        <EditText
-            android:id="@+id/editText1"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="numberSigned|numberDecimal"
-            android:text="@string/one" />
+            android:layout_height="wrap_content" >
 
-        <EditText
-            android:id="@+id/editText2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="numberSigned|numberDecimal"
-            android:text="@string/zero" />
+            <EditText
+                android:id="@+id/XText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="numberSigned|numberDecimal"
+                android:text="@string/one" />
 
-        <EditText
-            android:id="@+id/editText3"
+            <ToggleButton
+                android:id="@+id/CycleXTButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:onClick="CycleClick"
+                android:textOff="@string/cycle"
+                android:textOn="@string/cycle" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="numberSigned|numberDecimal"
-            android:text="@string/zero" />
+            android:layout_height="wrap_content" >
+
+            <EditText
+                android:id="@+id/YText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="numberSigned|numberDecimal"
+                android:text="@string/one" />
+
+            <ToggleButton
+                android:id="@+id/CycleYTButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:onClick="CycleClick"
+                android:textOff="@string/cycle"
+                android:textOn="@string/cycle" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <EditText
+                android:id="@+id/ZText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="numberSigned|numberDecimal"
+                android:text="@string/one" />
+
+            <ToggleButton
+                android:id="@+id/CycleZTButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:onClick="CycleClick"
+                android:textOff="@string/cycle"
+                android:textOn="@string/cycle" />
+
+        </LinearLayout>
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/ApplyButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
@@ -68,16 +119,7 @@
             android:text="@string/apply" />
 
         <ToggleButton
-            android:id="@+id/toggleButton2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:onClick="CycleClick"
-            android:textOff="@string/cycle"
-            android:textOn="@string/cycle" />
-
-        <ToggleButton
-            android:id="@+id/toggleButton3"
+            android:id="@+id/EncodeTButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
@@ -86,12 +128,12 @@
             android:textOn="@string/encode" />
 
         <DigitalClock
-            android:id="@+id/digitalClock1"
+            android:id="@+id/Clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/InformationView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/copyright" />

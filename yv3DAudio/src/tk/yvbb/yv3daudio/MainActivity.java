@@ -5,15 +5,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASSenc;
-
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
-import android.text.format.Time;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -27,6 +26,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 public class MainActivity extends ActionBarActivity {
 
     int chan;
@@ -34,18 +34,48 @@ public class MainActivity extends ActionBarActivity {
     String[] filelist;
     yvHRTF hrtf;
     Button openbut,stopbut,applybut;
-    ToggleButton playtb,cycletb,enctb;
+    ToggleButton playtb,cyclextb,cycleytb,cycleztb,enctb;
     EditText xtext,ytext,ztext;
+
+    double parseDouble(String s) {
+        double ret;
+        try {
+            ret=Double.parseDouble(s);
+        } catch (Exception e) {
+            ret=0;
+        }
+        return ret;
+    }
     
     Handler TurningHandler=new Handler() {
         public void handleMessage(Message msg) {
+            double x=parseDouble(xtext.getText().toString()),
+                   y=parseDouble(ytext.getText().toString()),
+                   z=parseDouble(ztext.getText().toString());
+            double theta,d;
             switch (msg.what) {
                 case 1:
-                    double x=Double.parseDouble(xtext.getText().toString()),z=Double.parseDouble(ztext.getText().toString());
-                    double theta=Math.atan2(z,x),d=Math.sqrt(x*x+z*z);
+                    theta=Math.atan2(z,y);
+                    d=Math.sqrt(y*y+z*z);
+                    theta+=.05;
+                    ytext.setText(Double.toString(d*Math.cos(theta)));
+                    ztext.setText(Double.toString(d*Math.sin(theta)));
+                    ApplyClick(null);
+                    break;
+                case 2:
+                    theta=Math.atan2(z,x);
+                    d=Math.sqrt(x*x+z*z);
                     theta+=.05;
                     xtext.setText(Double.toString(d*Math.cos(theta)));
                     ztext.setText(Double.toString(d*Math.sin(theta)));
+                    ApplyClick(null);
+                    break;
+                case 3:
+                    theta=Math.atan2(y,x);
+                    d=Math.sqrt(x*x+y*y);
+                    theta+=.05;
+                    xtext.setText(Double.toString(d*Math.cos(theta)));
+                    ytext.setText(Double.toString(d*Math.sin(theta)));
                     ApplyClick(null);
                     break;
             }
@@ -56,7 +86,7 @@ public class MainActivity extends ActionBarActivity {
     TimerTask TurningTask;
     
     Timer TurningTimer;
-    
+
     boolean isCycling=false;
 
     @Override
@@ -70,17 +100,24 @@ public class MainActivity extends ActionBarActivity {
                     .commit();
         }
         BASS.BASS_Init(-1,44100,0);
+        String path=getApplicationInfo().nativeLibraryDir;
+        String[] list=new File(path).list();
+        for (String s:list) {
+            BASS.BASS_PluginLoad(path+"/"+s,0);
+        }
         yvHRTF.Init(getAssets());
         filepath=Environment.getExternalStorageDirectory();
-        openbut=(Button)findViewById(R.id.button1);
-        playtb=(ToggleButton)findViewById(R.id.toggleButton1);
-        stopbut=(Button)findViewById(R.id.button2);
-        xtext=(EditText)findViewById(R.id.editText1);
-        ytext=(EditText)findViewById(R.id.editText2);
-        ztext=(EditText)findViewById(R.id.editText3);
-        applybut=(Button)findViewById(R.id.button3);
-        cycletb=(ToggleButton)findViewById(R.id.toggleButton2);
-        enctb=(ToggleButton)findViewById(R.id.toggleButton3);
+        openbut=(Button)findViewById(R.id.OpenButton);
+        playtb=(ToggleButton)findViewById(R.id.PlayTButton);
+        stopbut=(Button)findViewById(R.id.StopButton);
+        xtext=(EditText)findViewById(R.id.XText);
+        ytext=(EditText)findViewById(R.id.YText);
+        ztext=(EditText)findViewById(R.id.ZText);
+        applybut=(Button)findViewById(R.id.ApplyButton);
+        cyclextb=(ToggleButton)findViewById(R.id.CycleXTButton);
+        cycleytb=(ToggleButton)findViewById(R.id.CycleYTButton);
+        cycleztb=(ToggleButton)findViewById(R.id.CycleZTButton);
+        enctb=(ToggleButton)findViewById(R.id.EncodeTButton);
     }
 
     public void OpenClick(View v) {
@@ -117,7 +154,9 @@ public class MainActivity extends ActionBarActivity {
                             playtb.setChecked(false);
                             stopbut.setEnabled(false);
                             applybut.setEnabled(false);
-                            cycletb.setEnabled(false);
+                            cyclextb.setEnabled(false);
+                            cycleytb.setEnabled(false);
+                            cycleztb.setEnabled(false);
                             enctb.setEnabled(false);
                             return;
                         }
@@ -126,7 +165,9 @@ public class MainActivity extends ActionBarActivity {
                         playtb.setChecked(true);
                         stopbut.setEnabled(true);
                         applybut.setEnabled(true);
-                        cycletb.setEnabled(true);
+                        cyclextb.setEnabled(true);
+                        cycleytb.setEnabled(true);
+                        cycleztb.setEnabled(true);
                         enctb.setEnabled(true);
                         hrtf=new yvHRTF(chan);
                         ApplyClick(null);
@@ -155,45 +196,58 @@ public class MainActivity extends ActionBarActivity {
     }
     
     public void ApplyClick(View v) {
-        hrtf.MoveSpeaker(new Vec(Double.parseDouble(xtext.getText().toString()),Double.parseDouble(ytext.getText().toString()),Double.parseDouble(ztext.getText().toString())));
+        double x=parseDouble(xtext.getText().toString()),
+               y=parseDouble(ytext.getText().toString()),
+               z=parseDouble(ztext.getText().toString());
+        hrtf.MoveSpeaker(new Vec(x,y,z));
     }
     
     public void CycleClick(View v) {
-        if (cycletb.isChecked()) {
-            StartCycle();
+        ToggleButton tb=(ToggleButton)v;
+        if (tb.isChecked()) {
+            int Type=0;
+            if (v==cyclextb)
+                Type=1;
+            else if (v==cycleytb)
+                Type=2;
+            else
+                Type=3;
+            StartCycle(Type);
+            cyclextb.setEnabled(false);
+            cycleytb.setEnabled(false);
+            cycleztb.setEnabled(false);
+            tb.setEnabled(true);
         } else {
             StopCycle();
         }
     }
 
-    public void StartCycle() {
+    public void StartCycle(final int Type) {
         TurningTask=new TimerTask() {
             public void run() {
-                TurningHandler.sendEmptyMessage(1);
+                TurningHandler.sendEmptyMessage(Type);
             }
         };
         TurningTimer=new Timer(true);
         TurningTimer.schedule(TurningTask,100,100);
-        xtext.setEnabled(false);
-        ytext.setEnabled(false);
-        ztext.setEnabled(false);
-        cycletb.setChecked(true);
         isCycling=true;
     }
 
     public void StopCycle() {
         TurningTimer.cancel();
-        xtext.setEnabled(true);
-        ytext.setEnabled(true);
-        ztext.setEnabled(true);
-        cycletb.setChecked(false);
+        cyclextb.setEnabled(true);
+        cycleytb.setEnabled(true);
+        cycleztb.setEnabled(true);
+        cyclextb.setChecked(false);
+        cycleytb.setChecked(false);
+        cycleztb.setChecked(false);
         isCycling=false;
     }
 
     public void StartEncode() {
         SimpleDateFormat df=new SimpleDateFormat("yyyyMMddHHmmss");
         BASS.BASS_CHANNELINFO info=new BASS.BASS_CHANNELINFO();
-		BASS.BASS_ChannelGetInfo(chan,info);
+        BASS.BASS_ChannelGetInfo(chan,info);
         String filename=info.filename+"."+df.format(new Date())+".wav";
         BASSenc.BASS_Encode_Start(chan,filename,BASSenc.BASS_ENCODE_PCM,null,null);
         Toast toast=Toast.makeText(getApplicationContext(),"The file will be writen to "+filename,Toast.LENGTH_LONG);
