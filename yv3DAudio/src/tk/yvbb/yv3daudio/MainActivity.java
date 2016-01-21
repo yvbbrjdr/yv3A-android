@@ -174,6 +174,10 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    public void FuncClick(View v) {
+    	
+    }
+
     public void StartAuto() {
         AutoTask=new TimerTask() {
             public void run() {
@@ -182,11 +186,17 @@ public class MainActivity extends ActionBarActivity {
         };
         AutoTimer=new Timer(true);
         AutoTimer.schedule(AutoTask,100,100);
+        xtext.setEnabled(false);
+        ytext.setEnabled(false);
+        ztext.setEnabled(false);
         autotb.setChecked(true);
     }
 
     public void StopAuto() {
         AutoTimer.cancel();
+        xtext.setEnabled(true);
+        ytext.setEnabled(true);
+        ztext.setEnabled(true);
         autotb.setChecked(false);
     }
 
