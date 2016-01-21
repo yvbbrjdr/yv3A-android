@@ -33,8 +33,8 @@ public class MainActivity extends ActionBarActivity {
     File filepath;
     String[] filelist;
     yvHRTF hrtf;
-    Button openbut,stopbut,applybut;
-    ToggleButton playtb,cyclextb,cycleytb,cycleztb,enctb;
+    Button openbut,stopbut,applybut,funcbut;
+    ToggleButton playtb,autotb,enctb;
     EditText xtext,ytext,ztext;
 
     double parseDouble(String s) {
@@ -49,45 +49,14 @@ public class MainActivity extends ActionBarActivity {
     
     Handler TurningHandler=new Handler() {
         public void handleMessage(Message msg) {
-            double x=parseDouble(xtext.getText().toString()),
-                   y=parseDouble(ytext.getText().toString()),
-                   z=parseDouble(ztext.getText().toString());
-            double theta,d;
-            switch (msg.what) {
-                case 1:
-                    theta=Math.atan2(z,y);
-                    d=Math.sqrt(y*y+z*z);
-                    theta+=.05;
-                    ytext.setText(Double.toString(d*Math.cos(theta)));
-                    ztext.setText(Double.toString(d*Math.sin(theta)));
-                    ApplyClick(null);
-                    break;
-                case 2:
-                    theta=Math.atan2(z,x);
-                    d=Math.sqrt(x*x+z*z);
-                    theta+=.05;
-                    xtext.setText(Double.toString(d*Math.cos(theta)));
-                    ztext.setText(Double.toString(d*Math.sin(theta)));
-                    ApplyClick(null);
-                    break;
-                case 3:
-                    theta=Math.atan2(y,x);
-                    d=Math.sqrt(x*x+y*y);
-                    theta+=.05;
-                    xtext.setText(Double.toString(d*Math.cos(theta)));
-                    ytext.setText(Double.toString(d*Math.sin(theta)));
-                    ApplyClick(null);
-                    break;
-            }
+            
             super.handleMessage(msg);
         }
     };
     
-    TimerTask TurningTask;
+    TimerTask AutoTask;
     
-    Timer TurningTimer;
-
-    boolean isCycling=false;
+    Timer AutoTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,9 +83,8 @@ public class MainActivity extends ActionBarActivity {
         ytext=(EditText)findViewById(R.id.YText);
         ztext=(EditText)findViewById(R.id.ZText);
         applybut=(Button)findViewById(R.id.ApplyButton);
-        cyclextb=(ToggleButton)findViewById(R.id.CycleXTButton);
-        cycleytb=(ToggleButton)findViewById(R.id.CycleYTButton);
-        cycleztb=(ToggleButton)findViewById(R.id.CycleZTButton);
+        autotb=(ToggleButton)findViewById(R.id.AutoTButton);
+        funcbut=(Button)findViewById(R.id.FuncButton);
         enctb=(ToggleButton)findViewById(R.id.EncodeTButton);
     }
 
@@ -141,8 +109,8 @@ public class MainActivity extends ActionBarActivity {
                         OpenClick(null);
                     } else {
                         String file=sel.getPath();
-                        if (isCycling)
-                            StopCycle();
+                        if (autotb.isChecked())
+                            StopAuto();
                         if (enctb.isChecked())
                             StopEncode();
                         if (!BASS.BASS_StreamFree(chan))
@@ -154,9 +122,7 @@ public class MainActivity extends ActionBarActivity {
                             playtb.setChecked(false);
                             stopbut.setEnabled(false);
                             applybut.setEnabled(false);
-                            cyclextb.setEnabled(false);
-                            cycleytb.setEnabled(false);
-                            cycleztb.setEnabled(false);
+                            autotb.setEnabled(false);
                             enctb.setEnabled(false);
                             return;
                         }
@@ -165,9 +131,7 @@ public class MainActivity extends ActionBarActivity {
                         playtb.setChecked(true);
                         stopbut.setEnabled(true);
                         applybut.setEnabled(true);
-                        cyclextb.setEnabled(true);
-                        cycleytb.setEnabled(true);
-                        cycleztb.setEnabled(true);
+                        autotb.setEnabled(true);
                         enctb.setEnabled(true);
                         hrtf=new yvHRTF(chan);
                         ApplyClick(null);
@@ -202,46 +166,28 @@ public class MainActivity extends ActionBarActivity {
         hrtf.MoveSpeaker(new Vec(x,y,z));
     }
     
-    public void CycleClick(View v) {
-        ToggleButton tb=(ToggleButton)v;
-        if (tb.isChecked()) {
-            int Type=0;
-            if (v==cyclextb)
-                Type=1;
-            else if (v==cycleytb)
-                Type=2;
-            else
-                Type=3;
-            StartCycle(Type);
-            cyclextb.setEnabled(false);
-            cycleytb.setEnabled(false);
-            cycleztb.setEnabled(false);
-            tb.setEnabled(true);
+    public void AutoClick(View v) {
+        if (autotb.isChecked()) {
+            StartAuto();
         } else {
-            StopCycle();
+            StopAuto();
         }
     }
 
-    public void StartCycle(final int Type) {
-        TurningTask=new TimerTask() {
+    public void StartAuto() {
+        AutoTask=new TimerTask() {
             public void run() {
-                TurningHandler.sendEmptyMessage(Type);
+                TurningHandler.sendEmptyMessage(1);
             }
         };
-        TurningTimer=new Timer(true);
-        TurningTimer.schedule(TurningTask,100,100);
-        isCycling=true;
+        AutoTimer=new Timer(true);
+        AutoTimer.schedule(AutoTask,100,100);
+        autotb.setChecked(true);
     }
 
-    public void StopCycle() {
-        TurningTimer.cancel();
-        cyclextb.setEnabled(true);
-        cycleytb.setEnabled(true);
-        cycleztb.setEnabled(true);
-        cyclextb.setChecked(false);
-        cycleytb.setChecked(false);
-        cycleztb.setChecked(false);
-        isCycling=false;
+    public void StopAuto() {
+        AutoTimer.cancel();
+        autotb.setChecked(false);
     }
 
     public void StartEncode() {

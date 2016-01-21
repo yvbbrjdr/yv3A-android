@@ -6,9 +6,10 @@
     <string name="play">Play</string>
     <string name="stop">Stop</string>
     <string name="apply">Apply</string>
-    <string name="cycle">Cycle</string>
+    <string name="auto">Auto</string>
+    <string name="func">Func</string>
     <string name="one">1</string>
     <string name="encode">Encode</string>
-    <string name="copyright">Coded by yvbbrjdr\nSource: github.com/yvbbrjdr/yv3A-android\nEmail: xyyq@outlook.com</string>
+    <string name="copyright">Coded by yvbbrjdr\nEmail: xyyq@outlook.com</string>
 
 </resources>
