@@ -175,7 +175,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void FuncClick(View v) {
-    	
+        
     }
 
     public void StartAuto() {

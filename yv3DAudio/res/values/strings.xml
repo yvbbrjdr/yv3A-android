@@ -11,5 +11,8 @@
     <string name="one">1</string>
     <string name="encode">Encode</string>
     <string name="copyright">Coded by yvbbrjdr\nEmail: xyyq@outlook.com</string>
+    <string name="title_activity_function_controls">FunctionControls</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 
 </resources>
