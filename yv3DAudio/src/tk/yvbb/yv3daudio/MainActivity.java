@@ -6,6 +6,9 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import net.sourceforge.jeval.EvaluationException;
+import net.sourceforge.jeval.Evaluator;
+
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASSenc;
 
@@ -50,11 +53,47 @@ public class MainActivity extends ActionBarActivity {
         }
         return ret;
     }
-    
+
     Handler TurningHandler=new Handler() {
         public void handleMessage(Message msg) {
-            
+            double pos=BASS.BASS_ChannelBytes2Seconds(chan,BASS.BASS_ChannelGetPosition(chan,BASS.BASS_POS_BYTE));
+            String[] s=funcs.split(" |\n");
+            for (int i=0;i<s.length;i+=3) {
+                if (i+2>=s.length)
+                    break;
+                if (parseDouble(s[i+1])<=pos&&pos<=parseDouble(s[i+2])) {
+                    ProcessExpr(pos,s[i]);
+                }
+            }
             super.handleMessage(msg);
+        }
+
+        private void ProcessExpr(double pos,String Expression) {
+            EditText et;
+            switch (Expression.charAt(0)) {
+                case 'x':
+                    et=xtext;
+                    break;
+                case 'y':
+                    et=ytext;
+                    break;
+                case 'z':
+                    et=ztext;
+                    break;
+                default:
+                    return;
+            }
+            et.setText(Eval(Expression.substring(2).replaceAll("t",Double.toString(pos))));
+            ApplyClick(null);
+        }
+
+        private String Eval(String Expression) {
+            Evaluator je=new Evaluator();
+            try {
+                return je.evaluate(Expression);
+            } catch (EvaluationException e) {
+                return "0";
+            }
         }
     };
     
