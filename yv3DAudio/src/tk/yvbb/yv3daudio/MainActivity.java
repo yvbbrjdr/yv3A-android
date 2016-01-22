@@ -5,13 +5,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASSenc;
+
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -36,6 +39,7 @@ public class MainActivity extends ActionBarActivity {
     Button openbut,stopbut,applybut,funcbut;
     ToggleButton playtb,autotb,enctb;
     EditText xtext,ytext,ztext;
+    String funcs="x=cos(t) 0 3600\ny=0 0 3600\nz=sin(t) 0 3600";
 
     double parseDouble(String s) {
         double ret;
@@ -175,7 +179,16 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void FuncClick(View v) {
-        
+        Intent intent=new Intent(MainActivity.this,FunctionControls.class);
+        intent.putExtra("Funcs",funcs);
+        startActivityForResult(intent,1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode==1&&requestCode==1)
+            funcs=data.getStringExtra("Funcs");
     }
 
     public void StartAuto() {

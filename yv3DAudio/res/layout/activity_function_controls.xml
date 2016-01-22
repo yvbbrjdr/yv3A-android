@@ -6,10 +6,28 @@
     tools:context="tk.yvbb.yv3daudio.FunctionControls"
     tools:ignore="MergeRootFrame" >
 
-    <ListView
-        android:id="@+id/listView1"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-    </ListView>
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <EditText
+            android:id="@+id/Funcs"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:ems="10"
+            android:gravity="top|left"
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical" />
+
+        <Button
+            android:id="@+id/OKButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:onClick="OKClick"
+            android:text="@string/ok" />
+
+    </LinearLayout>
 
 </FrameLayout>
