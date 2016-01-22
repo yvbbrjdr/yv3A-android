@@ -2,12 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tk.yvbb.yv3daudio"
     android:versionCode="1"
-    android:versionName="1.2" >
+    android:versionName="1.3" >
 
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="19" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -22,6 +23,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="tk.yvbb.yv3daudio.FunctionControls"
+            android:label="@string/title_activity_function_controls" >
         </activity>
     </application>
 

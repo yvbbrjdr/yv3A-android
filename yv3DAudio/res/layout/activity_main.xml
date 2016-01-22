@@ -7,33 +7,38 @@
     tools:ignore="MergeRootFrame">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="216dp"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
         <Button
             android:id="@+id/OpenButton"
-            android:layout_width="288dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="OpenClick"
             android:text="@string/open" />
 
-        <ToggleButton
-            android:id="@+id/PlayTButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:onClick="PlayClick"
-            android:textOff="@string/play"
-            android:textOn="@string/play" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
 
-        <Button
-            android:id="@+id/StopButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:onClick="StopClick"
-            android:text="@string/stop" />
+            <ToggleButton
+                android:id="@+id/PlayTButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:onClick="PlayClick"
+                android:textOff="@string/play"
+                android:textOn="@string/play" />
+
+            <Button
+                android:id="@+id/StopButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:onClick="StopClick"
+                android:text="@string/stop" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -41,47 +46,27 @@
 
             <EditText
                 android:id="@+id/XText"
-                android:layout_width="match_parent"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:ems="10"
                 android:inputType="numberSigned|numberDecimal"
                 android:text="@string/one" />
-
-            <ToggleButton
-                android:id="@+id/CycleXTButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:onClick="CycleClick"
-                android:textOff="@string/cycle"
-                android:textOn="@string/cycle" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
 
             <EditText
                 android:id="@+id/YText"
-                android:layout_width="match_parent"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:ems="10"
                 android:inputType="numberSigned|numberDecimal"
                 android:text="@string/one" />
 
-            <ToggleButton
-                android:id="@+id/CycleYTButton"
-                android:layout_width="match_parent"
+            <EditText
+                android:id="@+id/ZText"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:onClick="CycleClick"
-                android:textOff="@string/cycle"
-                android:textOn="@string/cycle" />
+                android:ems="10"
+                android:inputType="numberSigned|numberDecimal"
+                android:text="@string/one" />
 
         </LinearLayout>
 
@@ -89,38 +74,35 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
-            <EditText
-                android:id="@+id/ZText"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/ApplyButton"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="numberSigned|numberDecimal"
-                android:text="@string/one" />
+                android:enabled="false"
+                android:onClick="ApplyClick"
+                android:text="@string/apply" />
 
             <ToggleButton
-                android:id="@+id/CycleZTButton"
-                android:layout_width="match_parent"
+                android:id="@+id/AutoTButton"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:enabled="false"
-                android:onClick="CycleClick"
-                android:textOff="@string/cycle"
-                android:textOn="@string/cycle" />
+                android:onClick="AutoClick"
+                android:textOff="@string/auto"
+                android:textOn="@string/auto" />
+
+            <Button
+                android:id="@+id/FuncButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="FuncClick"
+                android:text="@string/func" />
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/ApplyButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:onClick="ApplyClick"
-            android:text="@string/apply" />
-
         <ToggleButton
             android:id="@+id/EncodeTButton"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:enabled="false"
             android:onClick="EncodeClick"
@@ -139,4 +121,5 @@
             android:text="@string/copyright" />
 
     </LinearLayout>
+
 </FrameLayout>

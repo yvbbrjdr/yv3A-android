@@ -5,13 +5,19 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import net.sourceforge.jeval.EvaluationException;
+import net.sourceforge.jeval.Evaluator;
+
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASSenc;
+
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -33,9 +39,10 @@ public class MainActivity extends ActionBarActivity {
     File filepath;
     String[] filelist;
     yvHRTF hrtf;
-    Button openbut,stopbut,applybut;
-    ToggleButton playtb,cyclextb,cycleytb,cycleztb,enctb;
+    Button openbut,stopbut,applybut,funcbut;
+    ToggleButton playtb,autotb,enctb;
     EditText xtext,ytext,ztext;
+    String funcs="x=cos(t) 0 3600\ny=0 0 3600\nz=sin(t) 0 3600";
 
     double parseDouble(String s) {
         double ret;
@@ -46,48 +53,53 @@ public class MainActivity extends ActionBarActivity {
         }
         return ret;
     }
-    
+
     Handler TurningHandler=new Handler() {
         public void handleMessage(Message msg) {
-            double x=parseDouble(xtext.getText().toString()),
-                   y=parseDouble(ytext.getText().toString()),
-                   z=parseDouble(ztext.getText().toString());
-            double theta,d;
-            switch (msg.what) {
-                case 1:
-                    theta=Math.atan2(z,y);
-                    d=Math.sqrt(y*y+z*z);
-                    theta+=.05;
-                    ytext.setText(Double.toString(d*Math.cos(theta)));
-                    ztext.setText(Double.toString(d*Math.sin(theta)));
-                    ApplyClick(null);
+            double pos=BASS.BASS_ChannelBytes2Seconds(chan,BASS.BASS_ChannelGetPosition(chan,BASS.BASS_POS_BYTE));
+            String[] s=funcs.split(" |\n");
+            for (int i=0;i<s.length;i+=3) {
+                if (i+2>=s.length)
                     break;
-                case 2:
-                    theta=Math.atan2(z,x);
-                    d=Math.sqrt(x*x+z*z);
-                    theta+=.05;
-                    xtext.setText(Double.toString(d*Math.cos(theta)));
-                    ztext.setText(Double.toString(d*Math.sin(theta)));
-                    ApplyClick(null);
-                    break;
-                case 3:
-                    theta=Math.atan2(y,x);
-                    d=Math.sqrt(x*x+y*y);
-                    theta+=.05;
-                    xtext.setText(Double.toString(d*Math.cos(theta)));
-                    ytext.setText(Double.toString(d*Math.sin(theta)));
-                    ApplyClick(null);
-                    break;
+                if (parseDouble(s[i+1])<=pos&&pos<=parseDouble(s[i+2])) {
+                    ProcessExpr(pos,s[i]);
+                }
             }
             super.handleMessage(msg);
         }
+
+        private void ProcessExpr(double pos,String Expression) {
+            EditText et;
+            switch (Expression.charAt(0)) {
+                case 'x':
+                    et=xtext;
+                    break;
+                case 'y':
+                    et=ytext;
+                    break;
+                case 'z':
+                    et=ztext;
+                    break;
+                default:
+                    return;
+            }
+            et.setText(Eval(Expression.substring(2).replaceAll("t",Double.toString(pos))));
+            ApplyClick(null);
+        }
+
+        private String Eval(String Expression) {
+            Evaluator je=new Evaluator();
+            try {
+                return je.evaluate(Expression);
+            } catch (EvaluationException e) {
+                return "0";
+            }
+        }
     };
     
-    TimerTask TurningTask;
+    TimerTask AutoTask;
     
-    Timer TurningTimer;
-
-    boolean isCycling=false;
+    Timer AutoTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,9 +126,8 @@ public class MainActivity extends ActionBarActivity {
         ytext=(EditText)findViewById(R.id.YText);
         ztext=(EditText)findViewById(R.id.ZText);
         applybut=(Button)findViewById(R.id.ApplyButton);
-        cyclextb=(ToggleButton)findViewById(R.id.CycleXTButton);
-        cycleytb=(ToggleButton)findViewById(R.id.CycleYTButton);
-        cycleztb=(ToggleButton)findViewById(R.id.CycleZTButton);
+        autotb=(ToggleButton)findViewById(R.id.AutoTButton);
+        funcbut=(Button)findViewById(R.id.FuncButton);
         enctb=(ToggleButton)findViewById(R.id.EncodeTButton);
     }
 
@@ -141,8 +152,8 @@ public class MainActivity extends ActionBarActivity {
                         OpenClick(null);
                     } else {
                         String file=sel.getPath();
-                        if (isCycling)
-                            StopCycle();
+                        if (autotb.isChecked())
+                            StopAuto();
                         if (enctb.isChecked())
                             StopEncode();
                         if (!BASS.BASS_StreamFree(chan))
@@ -154,9 +165,7 @@ public class MainActivity extends ActionBarActivity {
                             playtb.setChecked(false);
                             stopbut.setEnabled(false);
                             applybut.setEnabled(false);
-                            cyclextb.setEnabled(false);
-                            cycleytb.setEnabled(false);
-                            cycleztb.setEnabled(false);
+                            autotb.setEnabled(false);
                             enctb.setEnabled(false);
                             return;
                         }
@@ -165,9 +174,7 @@ public class MainActivity extends ActionBarActivity {
                         playtb.setChecked(true);
                         stopbut.setEnabled(true);
                         applybut.setEnabled(true);
-                        cyclextb.setEnabled(true);
-                        cycleytb.setEnabled(true);
-                        cycleztb.setEnabled(true);
+                        autotb.setEnabled(true);
                         enctb.setEnabled(true);
                         hrtf=new yvHRTF(chan);
                         ApplyClick(null);
@@ -202,46 +209,47 @@ public class MainActivity extends ActionBarActivity {
         hrtf.MoveSpeaker(new Vec(x,y,z));
     }
     
-    public void CycleClick(View v) {
-        ToggleButton tb=(ToggleButton)v;
-        if (tb.isChecked()) {
-            int Type=0;
-            if (v==cyclextb)
-                Type=1;
-            else if (v==cycleytb)
-                Type=2;
-            else
-                Type=3;
-            StartCycle(Type);
-            cyclextb.setEnabled(false);
-            cycleytb.setEnabled(false);
-            cycleztb.setEnabled(false);
-            tb.setEnabled(true);
+    public void AutoClick(View v) {
+        if (autotb.isChecked()) {
+            StartAuto();
         } else {
-            StopCycle();
+            StopAuto();
         }
     }
 
-    public void StartCycle(final int Type) {
-        TurningTask=new TimerTask() {
-            public void run() {
-                TurningHandler.sendEmptyMessage(Type);
-            }
-        };
-        TurningTimer=new Timer(true);
-        TurningTimer.schedule(TurningTask,100,100);
-        isCycling=true;
+    public void FuncClick(View v) {
+        Intent intent=new Intent(MainActivity.this,FunctionControls.class);
+        intent.putExtra("Funcs",funcs);
+        startActivityForResult(intent,1);
     }
 
-    public void StopCycle() {
-        TurningTimer.cancel();
-        cyclextb.setEnabled(true);
-        cycleytb.setEnabled(true);
-        cycleztb.setEnabled(true);
-        cyclextb.setChecked(false);
-        cycleytb.setChecked(false);
-        cycleztb.setChecked(false);
-        isCycling=false;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode==1&&requestCode==1)
+            funcs=data.getStringExtra("Funcs");
+    }
+
+    public void StartAuto() {
+        AutoTask=new TimerTask() {
+            public void run() {
+                TurningHandler.sendEmptyMessage(1);
+            }
+        };
+        AutoTimer=new Timer(true);
+        AutoTimer.schedule(AutoTask,100,100);
+        xtext.setEnabled(false);
+        ytext.setEnabled(false);
+        ztext.setEnabled(false);
+        autotb.setChecked(true);
+    }
+
+    public void StopAuto() {
+        AutoTimer.cancel();
+        xtext.setEnabled(true);
+        ytext.setEnabled(true);
+        ztext.setEnabled(true);
+        autotb.setChecked(false);
     }
 
     public void StartEncode() {
