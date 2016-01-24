@@ -158,7 +158,7 @@ public class MainActivity extends ActionBarActivity {
                     } else {
                         String file=sel.getPath();
                         if (autotb.isChecked())
-                            StopAuto();
+                            autotb.setChecked(false);
                         if (enctb.isChecked())
                             StopEncode();
                         if (!BASS.BASS_StreamFree(chan))
