@@ -109,6 +109,29 @@
             android:textOff="@string/encode"
             android:textOn="@string/encode" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <EditText
+                android:id="@+id/BufferText"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number" >
+
+                <requestFocus />
+            </EditText>
+
+            <Button
+                android:id="@+id/SetBuffer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="SetBufClick"
+                android:text="@string/setbuffer" />
+
+        </LinearLayout>
+
         <DigitalClock
             android:id="@+id/Clock"
             android:layout_width="wrap_content"

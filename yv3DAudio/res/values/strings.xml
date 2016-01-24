@@ -13,5 +13,6 @@
     <string name="copyright">Coded by yvbbrjdr\nEmail: xyyq@outlook.com</string>
     <string name="title_activity_function_controls">FunctionControls</string>
     <string name="ok">OK</string>
+    <string name="setbuffer">SetBuf</string>
 
 </resources>

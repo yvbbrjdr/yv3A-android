@@ -1,6 +1,7 @@
 package tk.yvbb.yv3daudio;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
@@ -35,13 +36,13 @@ import android.widget.ToggleButton;
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
 public class MainActivity extends ActionBarActivity {
 
-    int chan;
+    int chan,hauto;
     File filepath;
     String[] filelist;
     yvHRTF hrtf;
-    Button openbut,stopbut,applybut,funcbut;
+    Button openbut,stopbut,applybut,funcbut,setbufbut;
     ToggleButton playtb,autotb,enctb;
-    EditText xtext,ytext,ztext;
+    EditText xtext,ytext,ztext,buftext;
     String funcs="x=cos(t) 0 3600\ny=0 0 3600\nz=sin(t) 0 3600";
 
     double parseDouble(String s) {
@@ -96,10 +97,6 @@ public class MainActivity extends ActionBarActivity {
             }
         }
     };
-    
-    TimerTask AutoTask;
-    
-    Timer AutoTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,13 +119,21 @@ public class MainActivity extends ActionBarActivity {
         openbut=(Button)findViewById(R.id.OpenButton);
         playtb=(ToggleButton)findViewById(R.id.PlayTButton);
         stopbut=(Button)findViewById(R.id.StopButton);
+        setbufbut=(Button)findViewById(R.id.SetBuffer);
         xtext=(EditText)findViewById(R.id.XText);
         ytext=(EditText)findViewById(R.id.YText);
         ztext=(EditText)findViewById(R.id.ZText);
+        buftext=(EditText)findViewById(R.id.BufferText);
         applybut=(Button)findViewById(R.id.ApplyButton);
         autotb=(ToggleButton)findViewById(R.id.AutoTButton);
         funcbut=(Button)findViewById(R.id.FuncButton);
         enctb=(ToggleButton)findViewById(R.id.EncodeTButton);
+        buftext.setText(Integer.toString(BASS.BASS_GetConfig(BASS.BASS_CONFIG_BUFFER)));
+    }
+
+    public void SetBufClick(View v) {
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_BUFFER,Integer.parseInt(buftext.getText().toString()));
+        buftext.setText(Integer.toString(BASS.BASS_GetConfig(BASS.BASS_CONFIG_BUFFER)));
     }
 
     public void OpenClick(View v) {
@@ -231,13 +236,12 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void StartAuto() {
-        AutoTask=new TimerTask() {
-            public void run() {
-                TurningHandler.sendEmptyMessage(1);
+        BASS.DSPPROC DSP=new BASS.DSPPROC() {
+            public void DSPPROC(int handle,int channel,ByteBuffer buffer,int length,Object user) {
+                ((Handler)user).sendEmptyMessage(1);
             }
         };
-        AutoTimer=new Timer(true);
-        AutoTimer.schedule(AutoTask,100,100);
+        hauto=BASS.BASS_ChannelSetDSP(chan,DSP,TurningHandler,2);
         xtext.setEnabled(false);
         ytext.setEnabled(false);
         ztext.setEnabled(false);
@@ -245,7 +249,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void StopAuto() {
-        AutoTimer.cancel();
+        BASS.BASS_ChannelRemoveDSP(chan,hauto);
         xtext.setEnabled(true);
         ytext.setEnabled(true);
         ztext.setEnabled(true);
